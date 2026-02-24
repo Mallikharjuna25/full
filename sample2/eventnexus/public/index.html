@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- ── SEO / Meta ── -->
+    <title>EventNexus — Inter-College Event Discovery & Management</title>
+    <meta
+      name="description"
+      content="Discover, register, and manage inter-college events in one centralised platform. Secure QR passes, real-time analytics, and seamless entry verification."
+    />
+    <meta name="theme-color" content="#0F172A" />
+
+    <!-- ── Open Graph ── -->
+    <meta property="og:title"       content="EventNexus — Inter-College Event Platform" />
+    <meta property="og:description" content="Discover. Register. Verify. Manage." />
+    <meta property="og:type"        content="website" />
+
+    <!-- ── Favicon (inline SVG as data URI) ── -->
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%237C3AED'/><text y='22' x='5' font-size='18'>✦</text></svg>"
+    />
+
+    <!--
+      ── Font preconnect ──
+      Fonts are loaded via @import inside globals.css (Syne + DM Sans).
+      Adding preconnect here speeds up the very first DNS lookup.
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- ── Base styles: prevent FOUC, set background colour ── -->
+    <style>
+      /* Matches --navy so there's no white flash on load */
+      html, body {
+        margin: 0;
+        padding: 0;
+        background: #0F172A;
+        color: #E2E8F0;
+      }
+      /* Hide root until React hydrates to avoid layout shift */
+      #root {
+        min-height: 100vh;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!--
+      React mounts here.
+      index.js → LandingPage → all section components.
+    -->
+    <div id="root"></div>
+
+    <!--
+      NOTE: Create React App / Vite injects the bundled JS automatically.
+      If you are NOT using a build tool, uncomment the line below and
+      point it to your compiled bundle:
+
+      <script src="/build/static/js/main.chunk.js"></script>
+    -->
+  </body>
+</html>
