@@ -1,131 +1,86 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const eventSchema = new mongoose.Schema(
+const EventSchema = new mongoose.Schema(
     {
         title: {
             type: String,
-            required: true,
+            required: [true, "Please add a title"],
             trim: true,
+            minlength: [3, "Title must be at least 3 characters"],
+            maxlength: [120, "Title cannot exceed 120 characters"],
         },
         description: {
             type: String,
-            required: true,
+            required: [true, "Please add a description"],
+            trim: true,
+            minlength: [10, "Description must be at least 10 characters"],
+            maxlength: [2000, "Description cannot exceed 2000 characters"],
         },
         college: {
             type: String,
-            required: true,
+            required: [true, "Please add a college name"],
+            trim: true,
         },
         category: {
             type: String,
-            enum: ['Tech', 'Cultural', 'Sports', 'Business', 'Science', 'Hackathon', 'Workshop', 'Other'],
+            required: [true, "Please add a category"],
+            enum: ["Technology", "Hackathon", "Cultural", "Sports", "Business", "Science", "Workshop", "Other"],
         },
-        date: {
-            type: Date,
-            required: true,
-        },
-        endDate: Date,
-        time: String,
         venue: {
             type: String,
-            required: true,
+            required: [true, "Please add a venue"],
+            trim: true,
         },
+        startDate: { type: Date, required: true },
+        endDate: { type: Date, required: true },
+        startTime: { type: String, default: "09:00" },
+        endTime: { type: String, default: "18:00" },
+        registrationDeadline: { type: Date, required: true },
         maxParticipants: {
             type: Number,
             required: true,
             min: 1,
+            max: 10000,
         },
-        registrationDeadline: {
-            type: Date,
-            required: true,
-        },
-        images: [String],
-        bannerImage: {
-            type: String,
-            default: '',
-        },
-        instructions: {
-            type: String,
-            default: '',
-        },
-        rules: [String],
-        prizes: [
-            {
-                position: String,
-                reward: String,
-            },
-        ],
-        coordinators: [
-            {
-                name: String,
-                phone: String,
-                email: String,
-            },
-        ],
-        tags: [String],
-        entryFee: {
-            type: Number,
-            default: 0,
-        },
-        isFree: {
-            type: Boolean,
-            default: true,
-        },
-        registrationFormFields: [
-            {
-                fieldName: String,
-                fieldLabel: String,
-                fieldType: {
-                    type: String,
-                    enum: ['text', 'email', 'number', 'select', 'file', 'textarea', 'checkbox'],
-                },
-                options: [String],
-                isRequired: {
-                    type: Boolean,
-                    default: true,
-                },
-                placeholder: String,
-            },
-        ],
-        host: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User',
-            required: true,
-        },
+        registrationFee: { type: Number, default: 0, min: 0 },
+        prizes: { type: String, trim: true, default: "" },
+        tags: { type: [String], default: [] },
+        image: { type: String, default: "" },
         status: {
             type: String,
-            enum: ['pending', 'approved', 'rejected', 'completed'],
-            default: 'pending',
+            enum: ["draft", "published", "cancelled", "completed"],
+            default: "published",
         },
-        adminNote: {
-            type: String,
-            default: '',
-        },
-        reviewedBy: {
+        coordinator: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'User',
+            ref: "User",
+            required: true,
         },
-        reviewedAt: Date,
-        registrationCount: {
-            type: Number,
-            default: 0,
-        },
-        attendanceCount: {
-            type: Number,
-            default: 0,
-        },
-        successRate: {
-            type: Number,
-            default: 0,
-        },
+        coordinatorName: { type: String, required: true },
+        coordinatorCollege: { type: String, required: true },
+        registrations: [
+            {
+                student: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+                registeredAt: { type: Date, default: Date.now },
+            },
+        ],
+        views: { type: Number, default: 0 },
+        isFeatured: { type: Boolean, default: false },
     },
-    {
-        timestamps: true,
-    }
+    { timestamps: true }
 );
 
-eventSchema.virtual('isRegistrationOpen').get(function () {
-    return this.registrationDeadline > new Date() && this.registrationCount < this.maxParticipants;
+EventSchema.virtual("registrationCount").get(function () {
+    return this.registrations.length;
 });
 
-const Event = mongoose.model('Event', eventSchema);
-module.exports = Event;
+EventSchema.virtual("isRegistrationOpen").get(function () {
+    return new Date() < this.registrationDeadline && this.status === "published";
+});
+
+EventSchema.index({ coordinator: 1 });
+EventSchema.index({ category: 1 });
+EventSchema.index({ startDate: 1 });
+EventSchema.index({ status: 1 });
+
+module.exports = mongoose.model("Event", EventSchema);

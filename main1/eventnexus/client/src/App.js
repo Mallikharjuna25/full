@@ -1,94 +1,72 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
-import { Toaster } from 'react-hot-toast';
-import Navbar from './components/Navbar';
-import { ProtectedRoute, AdminRoute } from './components/ProtectedRoute';
+import React from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import { StudentRoute, CoordinatorRoute, StudentGuestRoute, CoordinatorGuestRoute } from "./components/ProtectedRoute";
 
-// Pages
-import LandingPage from './pages/LandingPage';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
-import Home from './pages/Home';
-import EventDetails from './pages/EventDetails';
-import MyEvents from './pages/MyEvents';
-import CalendarPage from './pages/CalendarPage';
-import Profile from './pages/Profile';
-import HostEvent from './pages/HostEvent';
-import CreateEvent from './pages/CreateEvent';
-import EventAnalytics from './pages/EventAnalytics';
-import AdminLogin from './pages/AdminLogin';
-import AdminDashboard from './pages/AdminDashboard';
-import QRScannerPage from './components/QRScanner';
+// Public Pages
+import LandingPage from "./LandingPage";
+import CalendarPage from "./pages/CalendarPage";
 
-function App() {
+// Student Portal Pages
+import StudentLogin from "./pages/student/StudentLogin";
+import StudentSignup from "./pages/student/StudentSignup";
+import StudentHome from "./pages/student/StudentHome";
+import StudentProfile from "./pages/student/StudentProfile";
+import StudentMyEvents from "./pages/student/StudentMyEvents";
+
+// Coordinator Portal Pages
+import CoordinatorLogin from "./pages/coordinator/CoordinatorLogin";
+import CoordinatorSignup from "./pages/coordinator/CoordinatorSignup";
+import CoordinatorDashboard from "./pages/coordinator/CoordinatorDashboard";
+import CoordinatorProfile from "./pages/coordinator/CoordinatorProfile";
+import HostEvent from "./pages/coordinator/HostEvent";
+import CoordinatorMyEvents from "./pages/coordinator/CoordinatorMyEvents";
+import EventAnalytics from "./pages/coordinator/EventAnalytics";
+
+const App = () => {
     return (
-        <AuthProvider>
-            <Router>
-                <Toaster
-                    position="top-right"
-                    toastOptions={{
-                        style: {
-                            background: '#1E293B',
-                            color: '#fff',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                        }
-                    }}
-                />
-
-                {/* Render Navbar only on non-admin routes */}
+        <BrowserRouter>
+            <AuthProvider>
                 <Routes>
-                    <Route path="/admin/*" element={null} />
-                    <Route path="*" element={<Navbar />} />
+                    {/* Public routes */}
+                    <Route path="/" element={<LandingPage />} />
+                    <Route path="/calendar" element={<CalendarPage />} />
+
+                    {/* Student guest routes */}
+                    <Route element={<StudentGuestRoute />}>
+                        <Route path="/student-login" element={<StudentLogin />} />
+                        <Route path="/student-signup" element={<StudentSignup />} />
+                    </Route>
+
+                    {/* Coordinator guest routes */}
+                    <Route element={<CoordinatorGuestRoute />}>
+                        <Route path="/coordinator-login" element={<CoordinatorLogin />} />
+                        <Route path="/coordinator-signup" element={<CoordinatorSignup />} />
+                    </Route>
+
+                    {/* Student protected routes */}
+                    <Route element={<StudentRoute />}>
+                        <Route path="/student/home" element={<StudentHome />} />
+                        <Route path="/student/calendar" element={<CalendarPage />} />
+                        <Route path="/student/my-events" element={<StudentMyEvents />} />
+                        <Route path="/student/profile" element={<StudentProfile />} />
+                    </Route>
+
+                    {/* Coordinator protected routes */}
+                    <Route element={<CoordinatorRoute />}>
+                        <Route path="/coordinator/dashboard" element={<CoordinatorDashboard />} />
+                        <Route path="/coordinator/host-event" element={<HostEvent />} />
+                        <Route path="/coordinator/my-events" element={<CoordinatorMyEvents />} />
+                        <Route path="/coordinator/analytics" element={<EventAnalytics />} />
+                        <Route path="/coordinator/profile" element={<CoordinatorProfile />} />
+                    </Route>
+
+                    {/* Catch-all */}
+                    <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
-
-                <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-                    <main style={{ flex: 1 }}>
-                        <Routes>
-                            {/* Public Routes */}
-                            <Route path="/" element={<LandingPage />} />
-                            <Route path="/login" element={<Login />} />
-                            <Route path="/signup" element={<Signup />} />
-                            <Route path="/events/:id" element={<EventDetails />} />
-                            <Route path="/admin/login" element={<AdminLogin />} />
-
-                            {/* Protected Routes */}
-                            <Route element={<ProtectedRoute />}>
-                                <Route path="/home" element={<Home />} />
-                                <Route path="/calendar" element={<CalendarPage />} />
-                                <Route path="/my-events" element={<MyEvents />} />
-                                <Route path="/my-events/:id" element={<EventDetails />} />
-                                <Route path="/host-event" element={<HostEvent />} />
-                                <Route path="/host-event/create" element={<CreateEvent />} />
-                                <Route path="/host-event/edit/:id" element={<CreateEvent />} />
-
-                                {/* Wrap scanner in a div for layout */}
-                                <Route path="/host-event/:id/scan" element={
-                                    <div style={{ paddingTop: '100px', padding: '20px' }}>
-                                        <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Participant Scanner</h2>
-                                        <QRScannerPage />
-                                    </div>
-                                } />
-
-                                <Route path="/host-event/:id/analytics" element={<EventAnalytics />} />
-                                <Route path="/profile" element={<Profile />} />
-                            </Route>
-
-                            {/* Admin Routes */}
-                            <Route element={<AdminRoute />}>
-                                <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                                <Route path="/admin/events/:id" element={<EventDetails />} />
-                                <Route path="/admin/analytics/:id" element={<EventAnalytics />} />
-                            </Route>
-
-                            {/* Catch-all */}
-                            <Route path="*" element={<Navigate to="/" replace />} />
-                        </Routes>
-                    </main>
-                </div>
-            </Router>
-        </AuthProvider>
+            </AuthProvider>
+        </BrowserRouter>
     );
-}
+};
 
 export default App;

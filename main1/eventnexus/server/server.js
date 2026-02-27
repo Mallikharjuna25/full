@@ -12,6 +12,7 @@ const eventRoutes = require('./routes/eventRoutes');
 const registrationRoutes = require('./routes/registrationRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
+const coordinatorRoutes = require('./routes/coordinatorRoutes');
 
 // Initialize app
 const app = express();
@@ -39,6 +40,15 @@ app.use('/api/events', eventRoutes);
 app.use('/api/registrations', registrationRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/coordinator', coordinatorRoutes);
+
+// 404 Route Not Found Error Handler
+app.use((req, res, next) => {
+    res.status(404).json({
+        success: false,
+        message: 'Endpoint not found. Ensure you are using the correct Student or Coordinator Portal routes.'
+    });
+});
 
 // Global Error Handler
 app.use((err, req, res, next) => {

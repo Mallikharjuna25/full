@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Globe, QrCode, BarChart3, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { Globe, QrCode, BarChart3, ChevronRight, CheckCircle2, GraduationCap, Shield } from 'lucide-react';
 import { eventsAPI } from '../services/api';
 import EventCard from '../components/EventCard';
 import { SkeletonGrid } from '../components/SkeletonCard';
+import Navbar from '../components/Navbar';
 
 const LandingPage = () => {
     const [events, setEvents] = useState([]);
@@ -17,8 +18,9 @@ const LandingPage = () => {
         const fetchEvents = async () => {
             setLoading(true);
             try {
+                // If API is not fully up, this might fail, but it's okay based on spec (handle fallback if needed, but keeping as is per spec)
                 const { data } = await eventsAPI.getAll({ status: 'approved', category, search: searchTerm, limit: 9 });
-                setEvents(data.events);
+                setEvents(data.events || []);
             } catch (err) {
                 console.error(err);
             } finally {
@@ -43,6 +45,8 @@ const LandingPage = () => {
 
     return (
         <div style={{ overflowX: 'hidden' }}>
+            <Navbar />
+
             {/* Hero Section */}
             <section className="grid-bg" style={{ position: 'relative', minHeight: '100vh', display: 'flex', alignItems: 'center', paddingTop: '80px', paddingBottom: '60px' }}>
                 <div className="orb1"></div>
@@ -55,20 +59,17 @@ const LandingPage = () => {
                         <div style={{ display: 'inline-block', background: 'rgba(124, 58, 237, 0.2)', color: 'var(--cyan)', padding: '6px 16px', borderRadius: '30px', fontSize: '0.9rem', fontWeight: 'bold', marginBottom: '20px', border: '1px solid rgba(124, 58, 237, 0.4)' }}>
                             The Future of College Events
                         </div>
-                        <h1 style={{ fontSize: '4rem', lineHeight: '1.1', marginBottom: '20px' }}>
+                        <h1 style={{ fontSize: '4rem', lineHeight: '1.1', marginBottom: '20px', fontFamily: '"Syne", sans-serif', fontWeight: 800 }}>
                             <span className="shimmer-text">Discover. Register.</span><br />
                             Verify. Manage.
                         </h1>
-                        <p style={{ fontSize: '1.2rem', color: 'var(--text-muted)', marginBottom: '40px', maxWidth: '500px' }}>
+                        <p style={{ fontSize: '1.2rem', color: 'var(--text-muted)', marginBottom: '40px', maxWidth: '500px', fontFamily: '"DM Sans", sans-serif' }}>
                             The ultimate platform for inter-college event discovery. seamless registrations, instant QR passes, and real-time analytics for hosts.
                         </p>
                         <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
                             <a href="#events" className="btn-primary" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', padding: '14px 28px' }}>
                                 Explore Events <ChevronRight size={20} />
                             </a>
-                            <Link to="/signup" className="btn-outline" style={{ textDecoration: 'none', fontSize: '1.1rem', padding: '14px 28px' }}>
-                                Host an Event
-                            </Link>
                         </div>
 
                         <div style={{ display: 'flex', gap: '40px', marginTop: '50px', borderTop: '1px solid var(--border)', paddingTop: '30px' }}>
@@ -123,10 +124,81 @@ const LandingPage = () => {
                 </div>
             </section>
 
+            {/* PortalSection - New Addition */}
+            <section id="portals" className="grid-bg reveal" style={{ padding: '100px 5%', position: 'relative' }}>
+                <div className="orb2"></div>
+                <div style={{ textAlign: 'center', marginBottom: '60px', position: 'relative', zIndex: 2 }}>
+                    <h2 style={{ fontSize: '3rem', fontFamily: '"Syne", sans-serif', fontWeight: 700, marginBottom: '16px' }}>
+                        Choose Your <span className="grad-text">Portal</span>
+                    </h2>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem', maxWidth: '600px', margin: '0 auto', fontFamily: '"DM Sans", sans-serif' }}>
+                        Two dedicated experiences built for everyone in the inter-college ecosystem.
+                    </p>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '40px', maxWidth: '1000px', margin: '0 auto', position: 'relative', zIndex: 2 }}>
+                    {/* Student Portal Card */}
+                    <div className="glass feature-card" style={{ padding: '40px', borderRadius: '24px', position: 'relative', overflow: 'hidden', borderTop: '4px solid var(--violet)' }}>
+                        <div style={{ position: 'absolute', top: '-50px', right: '-50px', width: '150px', height: '150px', background: 'var(--violet)', opacity: 0.1, filter: 'blur(40px)', borderRadius: '50%' }}></div>
+                        <div style={{ width: '64px', height: '64px', background: 'rgba(124, 58, 237, 0.15)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', color: 'var(--violet)' }}>
+                            <GraduationCap size={32} />
+                        </div>
+                        <h3 style={{ fontSize: '2rem', fontFamily: '"Syne", sans-serif', marginBottom: '12px' }}>Student Portal</h3>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginBottom: '24px', lineHeight: 1.6 }}>
+                            Discover events, register instantly, track your event journey and get verified entry passes.
+                        </p>
+
+                        <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px 0', color: '#E2E8F0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><CheckCircle2 size={18} color="var(--violet)" /> 📅 Browse Events</li>
+                            <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><CheckCircle2 size={18} color="var(--violet)" /> 🎟 Register & Track</li>
+                            <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><CheckCircle2 size={18} color="var(--violet)" /> 📊 Event Calendar</li>
+                            <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><CheckCircle2 size={18} color="var(--violet)" /> 👤 Your Profile</li>
+                        </ul>
+
+                        <Link to="/student-login" className="btn-primary" style={{ display: 'block', textAlign: 'center', textDecoration: 'none', padding: '14px', fontSize: '1.1rem', width: '100%', marginBottom: '16px' }}>
+                            Student Login
+                        </Link>
+                        <div style={{ textAlign: 'center' }}>
+                            <Link to="/student-signup" style={{ color: 'var(--violet)', textDecoration: 'none', fontWeight: 500, fontSize: '0.95rem' }}>
+                                New here? Sign up →
+                            </Link>
+                        </div>
+                    </div>
+
+                    {/* Coordinator Portal Card */}
+                    <div className="glass feature-card" style={{ padding: '40px', borderRadius: '24px', position: 'relative', overflow: 'hidden', borderTop: '4px solid var(--cyan)' }}>
+                        <div style={{ position: 'absolute', top: '-50px', right: '-50px', width: '150px', height: '150px', background: 'var(--cyan)', opacity: 0.1, filter: 'blur(40px)', borderRadius: '50%' }}></div>
+                        <div style={{ width: '64px', height: '64px', background: 'rgba(34, 211, 238, 0.15)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', color: 'var(--cyan)' }}>
+                            <Shield size={32} />
+                        </div>
+                        <h3 style={{ fontSize: '2rem', fontFamily: '"Syne", sans-serif', marginBottom: '12px' }}>Coordinator Portal</h3>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginBottom: '24px', lineHeight: 1.6 }}>
+                            Host events, manage registrations, track analytics for your college and issue direct entry passes.
+                        </p>
+
+                        <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px 0', color: '#E2E8F0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><CheckCircle2 size={18} color="var(--cyan)" /> 🚀 Host Events</li>
+                            <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><CheckCircle2 size={18} color="var(--cyan)" /> 📈 Analytics Dashboard</li>
+                            <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><CheckCircle2 size={18} color="var(--cyan)" /> 📋 Manage Registrations</li>
+                            <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><CheckCircle2 size={18} color="var(--cyan)" /> 🏆 Event Performance</li>
+                        </ul>
+
+                        <Link to="/coordinator-login" className="btn-outline" style={{ display: 'block', textAlign: 'center', textDecoration: 'none', padding: '14px', fontSize: '1.1rem', width: '100%', marginBottom: '16px', borderColor: 'var(--cyan)', color: 'var(--cyan)' }}>
+                            Coordinator Login
+                        </Link>
+                        <div style={{ textAlign: 'center' }}>
+                            <Link to="/coordinator-signup" style={{ color: 'var(--cyan)', textDecoration: 'none', fontWeight: 500, fontSize: '0.95rem' }}>
+                                Register your institution →
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             {/* Events Section */}
             <section id="events" className="reveal" style={{ padding: '80px 5%', maxWidth: '1200px', margin: '0 auto' }}>
                 <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-                    <h2 style={{ fontSize: '2.5rem', marginBottom: '15px' }}>Events Happening Now</h2>
+                    <h2 style={{ fontSize: '2.5rem', marginBottom: '15px', fontFamily: '"Syne", sans-serif' }}>Events Happening Now</h2>
                     <p style={{ color: 'var(--text-muted)', maxWidth: '600px', margin: '0 auto' }}>Explore technical symposiums, cultural fests, and workshops across colleges.</p>
                 </div>
 
@@ -177,7 +249,7 @@ const LandingPage = () => {
             <section className="reveal" style={{ padding: '80px 5%', background: 'rgba(255,255,255,0.02)', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <div style={{ textAlign: 'center', marginBottom: '60px' }}>
-                        <h2 style={{ fontSize: '2.5rem' }}>Everything you need</h2>
+                        <h2 style={{ fontSize: '2.5rem', fontFamily: '"Syne", sans-serif' }}>Everything you need</h2>
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px' }}>
@@ -186,7 +258,7 @@ const LandingPage = () => {
                             <div style={{ width: '60px', height: '60px', margin: '0 auto 20px', background: 'rgba(34, 211, 238, 0.1)', color: 'var(--cyan)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <Globe size={32} />
                             </div>
-                            <h3 style={{ marginBottom: '15px' }}>Centralized Discovery</h3>
+                            <h3 style={{ marginBottom: '15px', fontFamily: '"Syne", sans-serif' }}>Centralized Discovery</h3>
                             <p style={{ color: 'var(--text-muted)' }}>Find all inter-college events in one place. Filter by category, college, and date.</p>
                         </div>
 
@@ -194,7 +266,7 @@ const LandingPage = () => {
                             <div style={{ width: '60px', height: '60px', margin: '0 auto 20px', background: 'rgba(124, 58, 237, 0.1)', color: 'var(--violet)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <QrCode size={32} />
                             </div>
-                            <h3 style={{ marginBottom: '15px' }}>QR Verification</h3>
+                            <h3 style={{ marginBottom: '15px', fontFamily: '"Syne", sans-serif' }}>QR Verification</h3>
                             <p style={{ color: 'var(--text-muted)' }}>Instant QR code generation upon registration. Seamless entry management using our built-in scanner.</p>
                         </div>
 
@@ -202,7 +274,7 @@ const LandingPage = () => {
                             <div style={{ width: '60px', height: '60px', margin: '0 auto 20px', background: 'rgba(236, 72, 153, 0.1)', color: 'var(--pink)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <BarChart3 size={32} />
                             </div>
-                            <h3 style={{ marginBottom: '15px' }}>Real-Time Analytics</h3>
+                            <h3 style={{ marginBottom: '15px', fontFamily: '"Syne", sans-serif' }}>Real-Time Analytics</h3>
                             <p style={{ color: 'var(--text-muted)' }}>Track registrations, monitor live attendance, and export detailed CSV reports instantly.</p>
                         </div>
 
@@ -212,7 +284,7 @@ const LandingPage = () => {
 
             {/* How it works */}
             <section className="reveal" style={{ padding: '100px 5%', maxWidth: '1200px', margin: '0 auto' }}>
-                <h2 style={{ textAlign: 'center', fontSize: '2.5rem', marginBottom: '60px' }}>How it works</h2>
+                <h2 style={{ textAlign: 'center', fontSize: '2.5rem', marginBottom: '60px', fontFamily: '"Syne", sans-serif' }}>How it works</h2>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', position: 'relative' }}>
                     <div style={{ position: 'absolute', top: '30px', left: '10%', right: '10%', height: '2px', background: 'linear-gradient(90deg, var(--cyan), var(--violet), var(--pink))', zIndex: 0 }}></div>
@@ -227,20 +299,11 @@ const LandingPage = () => {
                             <div style={{ width: '60px', height: '60px', margin: '0 auto 20px', background: 'var(--navy)', border: '2px solid var(--violet)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', fontWeight: 'bold' }}>
                                 {item.step}
                             </div>
-                            <h4>{item.title}</h4>
+                            <h4 style={{ fontFamily: '"Syne", sans-serif' }}>{item.title}</h4>
                             <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '10px' }}>{item.desc}</p>
                         </div>
                     ))}
                 </div>
-            </section>
-
-            {/* CTA Footer */}
-            <section className="reveal" style={{ padding: '80px 5%', background: 'var(--grad)', textAlign: 'center' }}>
-                <h2 style={{ fontSize: '3rem', marginBottom: '20px' }}>Ready to host your event?</h2>
-                <p style={{ fontSize: '1.2rem', marginBottom: '40px', maxWidth: '600px', margin: '0 auto 40px' }}>Join thousands of event organizers who trust EventNexus for their inter-college fests.</p>
-                <Link to="/signup" className="btn-primary" style={{ background: 'white', color: 'var(--violet)', fontSize: '1.2rem', padding: '16px 36px', textDecoration: 'none' }}>
-                    Get Started Free
-                </Link>
             </section>
 
             <footer style={{ padding: '40px 5%', borderTop: '1px solid var(--border)', textAlign: 'center', color: 'var(--text-muted)' }}>

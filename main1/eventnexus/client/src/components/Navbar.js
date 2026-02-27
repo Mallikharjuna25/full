@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink, Link, useLocation } from 'react-router-dom';
+import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Menu, X, ChevronDown, User, Settings, LogOut } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
 const Navbar = () => {
-    const { user, logout } = useAuth();
+    const { isAuthenticated, isStudent, isCoordinator } = useAuth();
     const location = useLocation();
+    const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
-    const [dropdownOpen, setDropdownOpen] = useState(false);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -20,24 +20,32 @@ const Navbar = () => {
 
     useEffect(() => {
         setIsOpen(false);
-        setDropdownOpen(false);
     }, [location.pathname]);
 
     const toggleMenu = () => setIsOpen(!isOpen);
 
-    const navLinks = user
-        ? [
-            { name: 'Home', path: '/home' },
-            { name: 'Calendar', path: '/calendar' },
-            { name: 'My Events', path: '/my-events' },
-            { name: 'Host Event', path: '/host-event' },
-        ]
-        : [
-            { name: 'Home', path: '/' },
-            { name: 'Events', path: '/#events' },
-            { name: 'Calendar', path: '/calendar' },
-            { name: 'Contact', path: '/#contact' },
-        ];
+    const navLinks = [
+        { name: 'Home', path: '/' },
+        { name: 'Events', path: '/#events' },
+        { name: 'Portals', path: '/#portals' },
+        { name: 'Calendar', path: '/calendar' },
+        { name: 'About Us', path: '/#about' },
+        { name: 'Contact', path: '/#contact' },
+    ];
+
+    const handleNavClick = (e, path) => {
+        if (path.startsWith('/#')) {
+            e.preventDefault();
+            if (location.pathname !== '/') {
+                navigate('/');
+                setTimeout(() => {
+                    document.querySelector(path.substring(1))?.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
+            } else {
+                document.querySelector(path.substring(1))?.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    };
 
     const headerStyle = {
         position: 'fixed',
@@ -57,11 +65,11 @@ const Navbar = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: '1200px', margin: '0 auto' }}>
 
                 {/* Logo */}
-                <Link to={user ? '/home' : '/'} style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
+                <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
                     <div style={{ background: 'var(--violet)', width: '36px', height: '36px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>
                         ✨
                     </div>
-                    <h2 style={{ margin: 0, fontSize: '1.2rem' }}>
+                    <h2 style={{ margin: 0, fontSize: '1.2rem', color: 'white' }}>
                         Event<span className="grad-text">Nexus</span>
                     </h2>
                 </Link>
@@ -72,52 +80,28 @@ const Navbar = () => {
                         <NavLink
                             key={link.name}
                             to={link.path}
-                            className={({ isActive }) => `nav-link ${isActive && link.path !== '/' ? 'active' : ''}`}
+                            onClick={(e) => handleNavClick(e, link.path)}
+                            className={({ isActive }) => `nav-link ${isActive && link.path !== '/' && !link.path.includes('#') ? 'active' : ''}`}
+                            style={{ color: 'white', textDecoration: 'none', fontWeight: 500 }}
                         >
                             {link.name}
                         </NavLink>
                     ))}
                 </nav>
 
-                {/* Desktop Auth / Profile */}
+                {/* Desktop Auth / Profile CTA */}
                 <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }} className="desktop-nav">
-                    {!user ? (
+                    {!isAuthenticated ? (
                         <>
-                            <Link to="/login" className="btn-outline" style={{ textDecoration: 'none' }}>Login</Link>
-                            <Link to="/signup" className="btn-primary" style={{ textDecoration: 'none' }}>Sign Up</Link>
+                            <Link to="/student-login" className="btn-outline" style={{ textDecoration: 'none' }}>Student Login</Link>
+                            <Link to="/coordinator-login" className="btn-primary" style={{ textDecoration: 'none' }}>Coordinator Login</Link>
                         </>
                     ) : (
-                        <div style={{ position: 'relative' }}>
-                            <div
-                                style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', padding: '5px 10px', borderRadius: '30px', background: 'rgba(255,255,255,0.05)' }}
-                                onClick={() => setDropdownOpen(!dropdownOpen)}
-                            >
-                                {user.avatar ? (
-                                    <img src={user.avatar} alt="Avatar" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} />
-                                ) : (
-                                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--grad)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
-                                        {user.name.charAt(0).toUpperCase()}
-                                    </div>
-                                )}
-                                <span style={{ fontSize: '0.9rem', fontWeight: '500' }}>{user.name.split(' ')[0]}</span>
-                                <ChevronDown size={14} />
-                            </div>
-
-                            {dropdownOpen && (
-                                <div className="glass" style={{ position: 'absolute', top: '120%', right: 0, width: '200px', padding: '10px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                                    <Link to="/profile" className="dropdown-item" style={{ display: 'flex', gap: '10px', padding: '10px', textDecoration: 'none', color: 'var(--text-primary)', borderRadius: '8px' }}>
-                                        <User size={16} /> My Profile
-                                    </Link>
-                                    <Link to="/profile" className="dropdown-item" style={{ display: 'flex', gap: '10px', padding: '10px', textDecoration: 'none', color: 'var(--text-primary)', borderRadius: '8px' }}>
-                                        <Settings size={16} /> Settings
-                                    </Link>
-                                    <div style={{ height: '1px', background: 'var(--border)', margin: '5px 0' }}></div>
-                                    <button onClick={logout} className="dropdown-item" style={{ display: 'flex', gap: '10px', padding: '10px', paddingLeft: '10px', textAlign: 'left', background: 'none', border: 'none', color: 'var(--pink)', cursor: 'pointer', borderRadius: '8px', width: '100%', font: 'inherit' }}>
-                                        <LogOut size={16} /> Logout
-                                    </button>
-                                </div>
-                            )}
-                        </div>
+                        isStudent ? (
+                            <Link to="/student/home" className="btn-primary" style={{ textDecoration: 'none' }}>Go to Dashboard</Link>
+                        ) : isCoordinator ? (
+                            <Link to="/coordinator/dashboard" className="btn-primary" style={{ textDecoration: 'none', backgroundImage: 'var(--grad2)' }}>Go to Dashboard</Link>
+                        ) : null
                     )}
                 </div>
 
@@ -130,35 +114,39 @@ const Navbar = () => {
 
             {/* Mobile Menu Panel */}
             {isOpen && (
-                <div className="glass mobile-menu" style={{ position: 'absolute', top: '100%', left: 0, right: 0, padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                <div className="glass mobile-menu" style={{ position: 'absolute', top: '100%', left: 0, right: 0, padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px', background: 'rgba(15,23,42,0.95)', borderBottom: '1px solid var(--border)' }}>
                     {navLinks.map((link) => (
-                        <NavLink key={link.name} to={link.path} className="nav-link" style={{ padding: '10px 0', fontSize: '1.1rem' }}>
+                        <NavLink
+                            key={link.name}
+                            to={link.path}
+                            onClick={(e) => { handleNavClick(e, link.path); setIsOpen(false); }}
+                            className="nav-link"
+                            style={{ padding: '10px 0', fontSize: '1.1rem', color: 'white', textDecoration: 'none' }}>
                             {link.name}
                         </NavLink>
                     ))}
                     <div style={{ height: '1px', background: 'var(--border)', margin: '10px 0' }}></div>
-                    {!user ? (
+                    {!isAuthenticated ? (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                            <Link to="/login" className="btn-outline" style={{ textAlign: 'center', textDecoration: 'none' }}>Login</Link>
-                            <Link to="/signup" className="btn-primary" style={{ textAlign: 'center', textDecoration: 'none' }}>Sign Up</Link>
+                            <Link to="/student-login" className="btn-outline" style={{ textAlign: 'center', textDecoration: 'none' }}>Student Login</Link>
+                            <Link to="/coordinator-login" className="btn-primary" style={{ textAlign: 'center', textDecoration: 'none' }}>Coordinator Login</Link>
                         </div>
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                            <Link to="/profile" className="btn-outline" style={{ textAlign: 'center', textDecoration: 'none' }}>Profile</Link>
-                            <button onClick={logout} className="btn-primary" style={{ width: '100%' }}>Logout</button>
+                            {isStudent && <Link to="/student/home" className="btn-primary" style={{ textAlign: 'center', textDecoration: 'none' }}>Go to Dashboard</Link>}
+                            {isCoordinator && <Link to="/coordinator/dashboard" className="btn-primary" style={{ textAlign: 'center', textDecoration: 'none' }}>Go to Dashboard</Link>}
                         </div>
                     )}
                 </div>
             )}
 
             <style>{`
-        .dropdown-item:hover { background: rgba(255,255,255,0.1); }
-        .mobile-toggle { display: none; }
-        @media (max-width: 900px) {
-          .desktop-nav { display: none !important; }
-          .mobile-toggle { display: block; }
-        }
-      `}</style>
+                .mobile-toggle { display: none; }
+                @media (max-width: 900px) {
+                    .desktop-nav { display: none !important; }
+                    .mobile-toggle { display: block; }
+                }
+            `}</style>
         </header>
     );
 };
