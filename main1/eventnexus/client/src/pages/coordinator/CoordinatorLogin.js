@@ -1,0 +1,205 @@
+import React, { useState } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { Mail, Lock, Building2, Eye, EyeOff, AlertCircle, Shield, ArrowRight } from 'lucide-react';
+
+const InputField = ({ icon: Icon, type, placeholder, value, onChange, isPassword, showPassword, togglePassword }) => (
+    <div style={{ position: 'relative', marginBottom: '20px' }}>
+        <div style={{
+            position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)',
+            color: 'var(--text-muted)', display: 'flex', alignItems: 'center'
+        }}>
+            <Icon size={20} />
+        </div>
+        <input
+            type={isPassword ? (showPassword ? 'text' : 'password') : type}
+            placeholder={placeholder}
+            value={value}
+            onChange={onChange}
+            autoComplete={isPassword ? 'current-password' : ''}
+            style={{
+                width: '100%', padding: '14px 15px 14px 45px',
+                background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)',
+                borderRadius: '12px', color: 'white', fontSize: '1rem', outline: 'none',
+                transition: 'all 0.3s'
+            }}
+            onFocus={(e) => { e.target.style.borderColor = 'var(--cyan)'; e.target.style.background = 'rgba(255,255,255,0.05)'; }}
+            onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.background = 'rgba(255,255,255,0.03)'; }}
+            required
+        />
+        {isPassword && (
+            <button
+                type="button"
+                onClick={togglePassword}
+                style={{
+                    position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)',
+                    background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', padding: '5px'
+                }}
+            >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+        )}
+    </div>
+);
+
+const CoordinatorLogin = () => {
+    const { loginCoordinator, authError, clearError } = useAuth();
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const [collegeName, setCollegeName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [localError, setLocalError] = useState('');
+
+    const from = location.state?.from?.pathname || '/coordinator/dashboard';
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLocalError('');
+        clearError();
+
+        if (!collegeName || !email || !password) {
+            return setLocalError('Please fill in all fields');
+        }
+
+        try {
+            setLoading(true);
+            await loginCoordinator(collegeName, email, password);
+            navigate(from, { replace: true });
+        } catch (err) {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', background: '#0F172A', overflow: 'hidden' }}>
+
+            <div className="noise" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, pointerEvents: 'none', opacity: 0.05, backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }} />
+
+            {/* Cyan/Blue Orbs for Coordinator */}
+            <div className="orb1" style={{ position: 'absolute', top: '10%', right: '20%', width: '300px', height: '300px', background: 'var(--cyan)', borderRadius: '50%', filter: 'blur(100px)', opacity: 0.2, animation: 'float 6s ease-in-out infinite' }} />
+            <div className="orb2" style={{ position: 'absolute', bottom: '10%', left: '20%', width: '300px', height: '300px', background: '#3B82F6', borderRadius: '50%', filter: 'blur(100px)', opacity: 0.15, animation: 'float 8s ease-in-out infinite reverse' }} />
+
+            <div className="glass animate-fade-up" style={{
+                position: 'relative', zIndex: 1, width: '100%', maxWidth: '440px', margin: '20px',
+                padding: '40px', borderRadius: '24px', backdropFilter: 'blur(20px)',
+                background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
+                boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)'
+            }}>
+
+                {/* Header */}
+                <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+                    <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', textDecoration: 'none', marginBottom: '24px' }}>
+                        <div style={{ background: 'var(--cyan)', width: '32px', height: '32px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Shield size={18} color="#0F172A" />
+                        </div>
+                        <h2 style={{ margin: 0, fontSize: '1.2rem', color: 'white', fontFamily: '"Syne", sans-serif' }}>
+                            Event<span className="grad-text" style={{ backgroundImage: 'linear-gradient(90deg, var(--cyan), #3B82F6)' }}>Nexus</span>
+                        </h2>
+                    </Link>
+
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(34, 211, 238, 0.15)', color: 'var(--cyan)', padding: '6px 14px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 600, border: '1px solid rgba(34, 211, 238, 0.3)' }}>
+                            <Shield size={16} /> Coordinator Portal
+                        </div>
+                    </div>
+
+                    <h1 style={{ fontSize: '1.8rem', fontFamily: '"Syne", sans-serif', color: 'white', marginBottom: '8px' }}>
+                        Welcome Organizer
+                    </h1>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>Sign in to manage and analyze your events</p>
+                </div>
+
+                {/* Error Banner */}
+                {(localError || authError) && (
+                    <div style={{
+                        background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)',
+                        color: '#FCA5A5', padding: '12px 16px', borderRadius: '12px',
+                        display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px',
+                        fontSize: '0.9rem'
+                    }}>
+                        <AlertCircle size={18} />
+                        <span>{localError || authError}</span>
+                    </div>
+                )}
+
+                {/* Form */}
+                <form onSubmit={handleSubmit}>
+                    <InputField
+                        icon={Building2}
+                        type="text"
+                        placeholder="Registered College Name"
+                        value={collegeName}
+                        onChange={(e) => setCollegeName(e.target.value)}
+                    />
+
+                    <InputField
+                        icon={Mail}
+                        type="email"
+                        placeholder="Coordinator Email Address"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
+
+                    <InputField
+                        icon={Lock}
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        isPassword
+                        showPassword={showPassword}
+                        togglePassword={() => setShowPassword(!showPassword)}
+                    />
+
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="btn-primary"
+                        style={{
+                            width: '100%', padding: '14px', fontSize: '1rem',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                            marginTop: '10px', opacity: loading ? 0.7 : 1, cursor: loading ? 'not-allowed' : 'pointer',
+                            backgroundImage: 'linear-gradient(135deg, var(--cyan) 0%, #3B82F6 100%)',
+                            color: '#0F172A', fontWeight: 'bold'
+                        }}
+                    >
+                        {loading ? (
+                            <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: '2px solid rgba(15,23,42,0.3)', borderTopColor: '#0F172A', animation: 'spin 1s linear infinite' }} />
+                        ) : (
+                            <>Sign In to Dashboard <ArrowRight size={18} /></>
+                        )}
+                    </button>
+                    <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+                </form>
+
+                {/* Footer Links */}
+                <div style={{ marginTop: '32px', textAlign: 'center' }}>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginBottom: '20px' }}>
+                        Institution not registered?{' '}
+                        <Link to="/coordinator-signup" style={{ color: 'var(--cyan)', textDecoration: 'none', fontWeight: 600 }}>Sign up</Link>
+                    </p>
+
+                    <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '20px 0' }} />
+
+                    <Link to="/student-login" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: 'var(--violet)', textDecoration: 'none', fontSize: '0.9rem', marginBottom: '20px', fontWeight: 500, padding: '8px 16px', background: 'rgba(124, 58, 237, 0.05)', borderRadius: '12px', border: '1px solid rgba(124, 58, 237, 0.2)' }}>
+                        Are you a student? →
+                    </Link>
+
+                    <div>
+                        <Link to="/" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            ← Back to EventNexus
+                        </Link>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    );
+};
+
+export default CoordinatorLogin;

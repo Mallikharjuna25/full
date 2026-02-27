@@ -4,7 +4,8 @@ const Registration = require('../models/Registration');
 exports.getPublicEvents = async (req, res) => {
     try {
         const { category, college, search, page = 1, limit = 12 } = req.query;
-        const query = { status: 'approved' };
+        // Accept both 'published' and legacy 'approved' statuses as public
+        const query = { status: { $in: ['published', 'approved'] } };
 
         if (category && category !== 'All') query.category = category;
         if (college) query.college = college;
@@ -31,7 +32,8 @@ exports.getEventById = async (req, res) => {
         const event = await Event.findById(req.params.id).populate('host', 'name college avatar email');
         if (!event) return res.status(404).json({ success: false, message: 'Event not found' });
 
-        if (event.status !== 'approved') {
+        // Allow event owner or admin to view non-public events; treat 'published' and legacy 'approved' as public
+        if (!['published', 'approved'].includes(event.status)) {
             if (!req.user || (req.user._id.toString() !== event.host._id.toString() && req.user.role !== 'admin')) {
                 return res.status(404).json({ success: false, message: 'Event not found' });
             }

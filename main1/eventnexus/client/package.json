@@ -3,25 +3,25 @@
     "version": "1.0.0",
     "private": true,
     "dependencies": {
-        "react": "^18.2.0",
-        "react-dom": "^18.2.0",
-        "react-scripts": "5.0.1",
-        "react-router-dom": "^6.18.0",
+        "@headlessui/react": "^1.7.17",
         "axios": "^1.6.0",
+        "html5-qrcode": "^2.3.8",
+        "lucide-react": "^0.292.0",
+        "moment": "^2.29.4",
+        "qrcode.react": "^3.1.0",
+        "react": "^18.2.0",
+        "react-big-calendar": "^1.8.7",
+        "react-dom": "^18.2.0",
+        "react-dropzone": "^14.2.3",
         "react-hook-form": "^7.48.2",
         "react-hot-toast": "^2.4.1",
-        "lucide-react": "^0.292.0",
-        "qrcode.react": "^3.1.0",
-        "html5-qrcode": "^2.3.8",
-        "react-big-calendar": "^1.8.7",
-        "moment": "^2.29.4",
-        "recharts": "^2.9.3",
-        "react-dropzone": "^14.2.3",
-        "@headlessui/react": "^1.7.17"
+        "react-router-dom": "^6.18.0",
+        "react-scripts": "5.0.1",
+        "recharts": "^2.15.4"
     },
     "scripts": {
-        "start": "react-scripts start",
-        "build": "react-scripts build"
+        "start": "node --max_old_space_size=4096 node_modules/react-scripts/scripts/start.js",
+        "build": "node --max_old_space_size=4096 node_modules/react-scripts/scripts/build.js"
     },
     "proxy": "http://localhost:5000",
     "browserslist": {
