@@ -7,10 +7,12 @@ import { StudentRoute, CoordinatorRoute, StudentGuestRoute, CoordinatorGuestRout
 // Public Pages
 import LandingPage from "./pages/LandingPage";
 import CalendarPage from "./pages/CalendarPage";
+import RoleSelection from "./pages/RoleSelection";
 
 // Student Portal Pages
 import StudentLogin from "./pages/student/StudentLogin";
 import StudentSignup from "./pages/student/StudentSignup";
+import StudentForgotPassword from "./pages/student/StudentForgotPassword";
 import StudentHome from "./pages/student/StudentHome";
 import StudentProfile from "./pages/student/StudentProfile";
 import StudentMyEvents from "./pages/student/StudentMyEvents";
@@ -18,6 +20,7 @@ import StudentMyEvents from "./pages/student/StudentMyEvents";
 // Coordinator Portal Pages
 import CoordinatorLogin from "./pages/coordinator/CoordinatorLogin";
 import CoordinatorSignup from "./pages/coordinator/CoordinatorSignup";
+import CoordinatorForgotPassword from "./pages/coordinator/CoordinatorForgotPassword";
 import CoordinatorDashboard from "./pages/coordinator/CoordinatorDashboard";
 import CoordinatorProfile from "./pages/coordinator/CoordinatorProfile";
 import HostEvent from "./pages/coordinator/HostEvent";
@@ -33,17 +36,20 @@ const App = () => {
                     {/* Public routes */}
                     <Route path="/" element={<LandingPage />} />
                     <Route path="/calendar" element={<CalendarPage />} />
+                    <Route path="/role-selection" element={<RoleSelection />} />
 
                     {/* Student guest routes */}
                     <Route element={<StudentGuestRoute />}>
                         <Route path="/student-login" element={<StudentLogin />} />
                         <Route path="/student-signup" element={<StudentSignup />} />
+                        <Route path="/student-forgot-password" element={<StudentForgotPassword />} />
                     </Route>
 
                     {/* Coordinator guest routes */}
                     <Route element={<CoordinatorGuestRoute />}>
                         <Route path="/coordinator-login" element={<CoordinatorLogin />} />
                         <Route path="/coordinator-signup" element={<CoordinatorSignup />} />
+                        <Route path="/coordinator-forgot-password" element={<CoordinatorForgotPassword />} />
                     </Route>
 
                     {/* Student protected routes */}

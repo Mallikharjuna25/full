@@ -1,6 +1,9 @@
 const User = require("../models/User");
+const OTP = require("../models/OTP");
 const jwt = require("jsonwebtoken");
 const { validationResult, matchedData } = require("express-validator");
+const { sendOTPEmail } = require("../services/emailService");
+const crypto = require("crypto");
 
 // Helper to send token response
 const sendTokenResponse = (user, statusCode, res) => {
@@ -236,5 +239,243 @@ exports.changePassword = async (req, res) => {
         sendTokenResponse(user, 200, res);
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// Generate 6-digit OTP
+const generateOTP = () => {
+    return crypto.randomInt(100000, 999999).toString();
+};
+
+// Request OTP for login
+exports.requestLoginOTP = async (req, res) => {
+    try {
+        const { email, role } = req.body;
+
+        if (!email || !role) {
+            return res.status(400).json({ success: false, message: "Email and role are required" });
+        }
+
+        // Check if user exists with the specified role
+        const user = await User.findOne({ email, role });
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found with this email and role" });
+        }
+
+        // Delete any existing OTPs for this email and purpose
+        await OTP.deleteMany({ email, purpose: 'login' });
+
+        // Generate new OTP
+        const otp = generateOTP();
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+        // Save OTP to database
+        await OTP.create({
+            email,
+            otp,
+            purpose: 'login',
+            expiresAt
+        });
+
+        // Send OTP via email
+        await sendOTPEmail({
+            to: email,
+            userName: user.name,
+            otp,
+            purpose: 'login'
+        });
+
+        res.status(200).json({
+            success: true,
+            message: "OTP sent to your email. Valid for 10 minutes."
+        });
+    } catch (error) {
+        console.error('Request Login OTP Error:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// Verify OTP and login
+exports.verifyLoginOTP = async (req, res) => {
+    try {
+        const { email, otp, role } = req.body;
+
+        if (!email || !otp || !role) {
+            return res.status(400).json({ success: false, message: "Email, OTP, and role are required" });
+        }
+
+        // Find OTP record
+        const otpRecord = await OTP.findOne({ 
+            email, 
+            purpose: 'login',
+            verified: false
+        }).sort({ createdAt: -1 });
+
+        if (!otpRecord) {
+            return res.status(400).json({ success: false, message: "No OTP found or OTP already used" });
+        }
+
+        // Check if OTP is expired
+        if (new Date() > otpRecord.expiresAt) {
+            await OTP.deleteOne({ _id: otpRecord._id });
+            return res.status(400).json({ success: false, message: "OTP has expired. Please request a new one." });
+        }
+
+        // Check attempts
+        if (otpRecord.attempts >= 5) {
+            await OTP.deleteOne({ _id: otpRecord._id });
+            return res.status(400).json({ success: false, message: "Too many failed attempts. Please request a new OTP." });
+        }
+
+        // Verify OTP
+        if (otpRecord.otp !== otp) {
+            otpRecord.attempts += 1;
+            await otpRecord.save();
+            return res.status(400).json({ 
+                success: false, 
+                message: `Invalid OTP. ${5 - otpRecord.attempts} attempts remaining.` 
+            });
+        }
+
+        // Mark OTP as verified
+        otpRecord.verified = true;
+        await otpRecord.save();
+
+        // Find user and login
+        const user = await User.findOne({ email, role });
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        user.lastLogin = Date.now();
+        await user.save({ validateBeforeSave: false });
+
+        // Delete the used OTP
+        await OTP.deleteOne({ _id: otpRecord._id });
+
+        sendTokenResponse(user, 200, res);
+    } catch (error) {
+        console.error('Verify Login OTP Error:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// Request OTP for forgot password
+exports.requestForgotPasswordOTP = async (req, res) => {
+    try {
+        const { email, role } = req.body;
+
+        if (!email || !role) {
+            return res.status(400).json({ success: false, message: "Email and role are required" });
+        }
+
+        // Check if user exists
+        const user = await User.findOne({ email, role });
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found with this email and role" });
+        }
+
+        // Delete any existing OTPs for this email and purpose
+        await OTP.deleteMany({ email, purpose: 'forgot-password' });
+
+        // Generate new OTP
+        const otp = generateOTP();
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+        // Save OTP to database
+        await OTP.create({
+            email,
+            otp,
+            purpose: 'forgot-password',
+            expiresAt
+        });
+
+        // Send OTP via email
+        await sendOTPEmail({
+            to: email,
+            userName: user.name,
+            otp,
+            purpose: 'forgot-password'
+        });
+
+        res.status(200).json({
+            success: true,
+            message: "Password reset OTP sent to your email. Valid for 10 minutes."
+        });
+    } catch (error) {
+        console.error('Request Forgot Password OTP Error:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// Verify OTP and reset password
+exports.resetPasswordWithOTP = async (req, res) => {
+    try {
+        const { email, otp, newPassword, role } = req.body;
+
+        if (!email || !otp || !newPassword || !role) {
+            return res.status(400).json({ success: false, message: "Email, OTP, new password, and role are required" });
+        }
+
+        if (newPassword.length < 6) {
+            return res.status(400).json({ success: false, message: "Password must be at least 6 characters" });
+        }
+
+        // Find OTP record
+        const otpRecord = await OTP.findOne({ 
+            email, 
+            purpose: 'forgot-password',
+            verified: false
+        }).sort({ createdAt: -1 });
+
+        if (!otpRecord) {
+            return res.status(400).json({ success: false, message: "No OTP found or OTP already used" });
+        }
+
+        // Check if OTP is expired
+        if (new Date() > otpRecord.expiresAt) {
+            await OTP.deleteOne({ _id: otpRecord._id });
+            return res.status(400).json({ success: false, message: "OTP has expired. Please request a new one." });
+        }
+
+        // Check attempts
+        if (otpRecord.attempts >= 5) {
+            await OTP.deleteOne({ _id: otpRecord._id });
+            return res.status(400).json({ success: false, message: "Too many failed attempts. Please request a new OTP." });
+        }
+
+        // Verify OTP
+        if (otpRecord.otp !== otp) {
+            otpRecord.attempts += 1;
+            await otpRecord.save();
+            return res.status(400).json({ 
+                success: false, 
+                message: `Invalid OTP. ${5 - otpRecord.attempts} attempts remaining.` 
+            });
+        }
+
+        // Mark OTP as verified
+        otpRecord.verified = true;
+        await otpRecord.save();
+
+        // Find user and update password
+        const user = await User.findOne({ email, role });
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        user.password = newPassword;
+        await user.save();
+
+        // Delete the used OTP
+        await OTP.deleteOne({ _id: otpRecord._id });
+
+        res.status(200).json({
+            success: true,
+            message: "Password has been reset successfully. You can now login with your new password."
+        });
+    } catch (error) {
+        console.error('Reset Password with OTP Error:', error);
+        res.status(500).json({ success:false, message: error.message });
     }
 };

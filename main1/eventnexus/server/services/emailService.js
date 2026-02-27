@@ -1,9 +1,7 @@
 const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT,
-    secure: process.env.SMTP_PORT == 465,
+    service: 'gmail',
     auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
@@ -104,9 +102,35 @@ const sendAttendanceReport = async ({ adminEmail, eventTitle, csvData, totalRegi
     });
 };
 
+const sendOTPEmail = async ({ to, userName, otp, purpose }) => {
+    const purposeMap = {
+        'login': 'Login Verification',
+        'forgot-password': 'Password Reset',
+        'registration': 'Registration Verification'
+    };
+
+    const content = `
+    <h3>Hi ${userName || 'User'},</h3>
+    <p>Your OTP for ${purposeMap[purpose] || 'verification'} is:</p>
+    <div style="background: linear-gradient(135deg, #7C3AED 0%, #22D3EE 100%); padding: 20px; border-radius: 12px; text-align: center; margin: 20px 0;">
+      <h1 style="color: white; font-size: 48px; margin: 0; letter-spacing: 8px; font-family: 'Courier New', monospace;">${otp}</h1>
+    </div>
+    <p style="color: #94A3B8;">This OTP is valid for <strong>10 minutes</strong>.</p>
+    <p style="color: #94A3B8; font-size: 14px;">If you didn't request this OTP, please ignore this email.</p>
+  `;
+
+    await transporter.sendMail({
+        from: `"EventNexus" <${process.env.SMTP_USER}>`,
+        to,
+        subject: `🔐 Your OTP: ${otp} - ${purposeMap[purpose]}`,
+        html: getEmailTemplate(content),
+    });
+};
+
 module.exports = {
     sendRegistrationConfirmation,
     sendEventApproved,
     sendEventRejected,
-    sendAttendanceReport
+    sendAttendanceReport,
+    sendOTPEmail
 };

@@ -1,18 +1,29 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Globe, QrCode, BarChart3, ChevronRight, CheckCircle2, GraduationCap, Shield } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Globe, QrCode, BarChart3, ChevronRight } from 'lucide-react';
 import { eventsAPI } from '../services/api';
 import EventCard from '../components/EventCard';
 import { SkeletonGrid } from '../components/SkeletonCard';
 import Navbar from '../components/Navbar';
+import { useAuth } from '../context/AuthContext';
 
 const LandingPage = () => {
+    const { isAuthenticated, isStudent, isCoordinator } = useAuth();
+    const navigate = useNavigate();
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [category, setCategory] = useState('All');
     const [searchTerm, setSearchTerm] = useState('');
 
     const categories = ['All', 'Tech', 'Cultural', 'Sports', 'Business', 'Hackathon', 'Workshop', 'Other'];
+
+    const handleHostEvent = () => {
+        if (!isAuthenticated) {
+            navigate('/role-selection');
+        } else if (isCoordinator) {
+            navigate('/coordinator/host-event');
+        }
+    };
 
     useEffect(() => {
         const fetchEvents = async () => {
@@ -77,7 +88,16 @@ const LandingPage = () => {
                             The ultimate platform for inter-college event discovery. seamless registrations, instant QR passes, and real-time analytics for hosts.
                         </p>
                         <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
-                            <a href="#events" className="btn-primary" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', padding: '14px 28px' }}>
+                            {!isStudent && (
+                                <button 
+                                    onClick={handleHostEvent}
+                                    className="btn-primary" 
+                                    style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', padding: '14px 28px', border: 'none', cursor: 'pointer' }}
+                                >
+                                    Host an Event <ChevronRight size={20} />
+                                </button>
+                            )}
+                            <a href="#events" className="btn-outline" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', padding: '14px 28px' }}>
                                 Explore Events <ChevronRight size={20} />
                             </a>
                         </div>
@@ -131,77 +151,6 @@ const LandingPage = () => {
                         </div>
                     </div>
 
-                </div>
-            </section>
-
-            {/* PortalSection - New Addition */}
-            <section id="portals" className="grid-bg reveal" style={{ padding: '100px 5%', position: 'relative' }}>
-                <div className="orb2"></div>
-                <div style={{ textAlign: 'center', marginBottom: '60px', position: 'relative', zIndex: 2 }}>
-                    <h2 style={{ fontSize: '3rem', fontFamily: '"Syne", sans-serif', fontWeight: 700, marginBottom: '16px' }}>
-                        Choose Your <span className="grad-text">Portal</span>
-                    </h2>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem', maxWidth: '600px', margin: '0 auto', fontFamily: '"DM Sans", sans-serif' }}>
-                        Two dedicated experiences built for everyone in the inter-college ecosystem.
-                    </p>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '40px', maxWidth: '1000px', margin: '0 auto', position: 'relative', zIndex: 2 }}>
-                    {/* Student Portal Card */}
-                    <div className="glass feature-card" style={{ padding: '40px', borderRadius: '24px', position: 'relative', overflow: 'hidden', borderTop: '4px solid var(--violet)' }}>
-                        <div style={{ position: 'absolute', top: '-50px', right: '-50px', width: '150px', height: '150px', background: 'var(--violet)', opacity: 0.1, filter: 'blur(40px)', borderRadius: '50%' }}></div>
-                        <div style={{ width: '64px', height: '64px', background: 'rgba(124, 58, 237, 0.15)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', color: 'var(--violet)' }}>
-                            <GraduationCap size={32} />
-                        </div>
-                        <h3 style={{ fontSize: '2rem', fontFamily: '"Syne", sans-serif', marginBottom: '12px' }}>Student Portal</h3>
-                        <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginBottom: '24px', lineHeight: 1.6 }}>
-                            Discover events, register instantly, track your event journey and get verified entry passes.
-                        </p>
-
-                        <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px 0', color: '#E2E8F0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                            <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><CheckCircle2 size={18} color="var(--violet)" /> 📅 Browse Events</li>
-                            <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><CheckCircle2 size={18} color="var(--violet)" /> 🎟 Register & Track</li>
-                            <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><CheckCircle2 size={18} color="var(--violet)" /> 📊 Event Calendar</li>
-                            <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><CheckCircle2 size={18} color="var(--violet)" /> 👤 Your Profile</li>
-                        </ul>
-
-                        <Link to="/student-login" className="btn-primary" style={{ display: 'block', textAlign: 'center', textDecoration: 'none', padding: '14px', fontSize: '1.1rem', width: '100%', marginBottom: '16px' }}>
-                            Student Login
-                        </Link>
-                        <div style={{ textAlign: 'center' }}>
-                            <Link to="/student-signup" style={{ color: 'var(--violet)', textDecoration: 'none', fontWeight: 500, fontSize: '0.95rem' }}>
-                                New here? Sign up →
-                            </Link>
-                        </div>
-                    </div>
-
-                    {/* Coordinator Portal Card */}
-                    <div className="glass feature-card" style={{ padding: '40px', borderRadius: '24px', position: 'relative', overflow: 'hidden', borderTop: '4px solid var(--cyan)' }}>
-                        <div style={{ position: 'absolute', top: '-50px', right: '-50px', width: '150px', height: '150px', background: 'var(--cyan)', opacity: 0.1, filter: 'blur(40px)', borderRadius: '50%' }}></div>
-                        <div style={{ width: '64px', height: '64px', background: 'rgba(34, 211, 238, 0.15)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', color: 'var(--cyan)' }}>
-                            <Shield size={32} />
-                        </div>
-                        <h3 style={{ fontSize: '2rem', fontFamily: '"Syne", sans-serif', marginBottom: '12px' }}>Coordinator Portal</h3>
-                        <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginBottom: '24px', lineHeight: 1.6 }}>
-                            Host events, manage registrations, track analytics for your college and issue direct entry passes.
-                        </p>
-
-                        <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px 0', color: '#E2E8F0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                            <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><CheckCircle2 size={18} color="var(--cyan)" /> 🚀 Host Events</li>
-                            <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><CheckCircle2 size={18} color="var(--cyan)" /> 📈 Analytics Dashboard</li>
-                            <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><CheckCircle2 size={18} color="var(--cyan)" /> 📋 Manage Registrations</li>
-                            <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><CheckCircle2 size={18} color="var(--cyan)" /> 🏆 Event Performance</li>
-                        </ul>
-
-                        <Link to="/coordinator-login" className="btn-outline" style={{ display: 'block', textAlign: 'center', textDecoration: 'none', padding: '14px', fontSize: '1.1rem', width: '100%', marginBottom: '16px', borderColor: 'var(--cyan)', color: 'var(--cyan)' }}>
-                            Coordinator Login
-                        </Link>
-                        <div style={{ textAlign: 'center' }}>
-                            <Link to="/coordinator-signup" style={{ color: 'var(--cyan)', textDecoration: 'none', fontWeight: 500, fontSize: '0.95rem' }}>
-                                Register your institution →
-                            </Link>
-                        </div>
-                    </div>
                 </div>
             </section>
 

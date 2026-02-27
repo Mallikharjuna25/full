@@ -27,7 +27,6 @@ const Navbar = () => {
     const navLinks = [
         { name: 'Home', path: '/' },
         { name: 'Events', path: '/#events' },
-        { name: 'Portals', path: '/#portals' },
         { name: 'Calendar', path: '/calendar' },
         { name: 'About Us', path: '/#about' },
         { name: 'Contact', path: '/#contact' },
@@ -92,10 +91,7 @@ const Navbar = () => {
                 {/* Desktop Auth / Profile CTA */}
                 <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }} className="desktop-nav">
                     {!isAuthenticated ? (
-                        <>
-                            <Link to="/student-login" className="btn-outline" style={{ textDecoration: 'none' }}>Student Login</Link>
-                            <Link to="/coordinator-login" className="btn-primary" style={{ textDecoration: 'none' }}>Coordinator Login</Link>
-                        </>
+                        <Link to="/role-selection" className="btn-primary" style={{ textDecoration: 'none' }}>Login</Link>
                     ) : (
                         isStudent ? (
                             <Link to="/student/home" className="btn-primary" style={{ textDecoration: 'none' }}>Go to Dashboard</Link>
@@ -127,10 +123,7 @@ const Navbar = () => {
                     ))}
                     <div style={{ height: '1px', background: 'var(--border)', margin: '10px 0' }}></div>
                     {!isAuthenticated ? (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                            <Link to="/student-login" className="btn-outline" style={{ textAlign: 'center', textDecoration: 'none' }}>Student Login</Link>
-                            <Link to="/coordinator-login" className="btn-primary" style={{ textAlign: 'center', textDecoration: 'none' }}>Coordinator Login</Link>
-                        </div>
+                        <Link to="/role-selection" className="btn-primary" style={{ textAlign: 'center', textDecoration: 'none' }}>Login</Link>
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                             {isStudent && <Link to="/student/home" className="btn-primary" style={{ textAlign: 'center', textDecoration: 'none' }}>Go to Dashboard</Link>}

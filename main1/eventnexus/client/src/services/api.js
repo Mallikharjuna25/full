@@ -49,6 +49,12 @@ export const authAPI = {
     updateStudentProfile: (data) => api.put("/auth/student/profile", data),
     updateCoordinatorProfile: (data) => api.put("/auth/coordinator/profile", data),
     changePassword: (data) => api.put("/auth/change-password", data),
+    
+    // OTP Authentication
+    requestLoginOTP: (email, role) => api.post("/auth/otp/request-login", { email, role }),
+    verifyLoginOTP: (email, otp, role) => api.post("/auth/otp/verify-login", { email, otp, role }),
+    requestForgotPasswordOTP: (email, role) => api.post("/auth/otp/request-forgot-password", { email, role }),
+    resetPasswordWithOTP: (email, otp, newPassword, role) => api.post("/auth/otp/reset-password", { email, otp, newPassword, role }),
 };
 
 export const coordinatorAPI = {

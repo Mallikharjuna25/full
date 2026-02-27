@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Mail, Lock, Building2, Eye, EyeOff, AlertCircle, Shield, ArrowRight } from 'lucide-react';
+import { Mail, Lock, Building2, Eye, EyeOff, AlertCircle, Shield, ArrowRight, CheckCircle, KeyRound } from 'lucide-react';
+import { authAPI } from '../../services/api';
+import OTPInput from '../../components/OTPInput';
+import toast from 'react-hot-toast';
 
 const InputField = ({ icon: Icon, type, placeholder, value, onChange, isPassword, showPassword, togglePassword }) => (
     <div style={{ position: 'relative', marginBottom: '20px' }}>
@@ -48,16 +51,28 @@ const CoordinatorLogin = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
+    const [loginMode, setLoginMode] = useState('password'); // 'password' or 'otp'
     const [collegeName, setCollegeName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [otp, setOtp] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [otpSent, setOtpSent] = useState(false);
     const [localError, setLocalError] = useState('');
+    const [countdown, setCountdown] = useState(0);
 
     const from = location.state?.from?.pathname || '/coordinator/dashboard';
 
-    const handleSubmit = async (e) => {
+    // Countdown timer
+    React.useEffect(() => {
+        if (countdown > 0) {
+            const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [countdown]);
+
+    const handlePasswordLogin = async (e) => {
         e.preventDefault();
         setLocalError('');
         clearError();
@@ -71,6 +86,55 @@ const CoordinatorLogin = () => {
             await loginCoordinator(collegeName, email, password);
             navigate(from, { replace: true });
         } catch (err) {
+            setLoading(false);
+        }
+    };
+
+    const handleRequestOTP = async (e) => {
+        e.preventDefault();
+        setLocalError('');
+
+        if (!email) {
+            return setLocalError('Please enter your email address');
+        }
+
+        try {
+            setLoading(true);
+            const response = await authAPI.requestLoginOTP(email, 'coordinator');
+            toast.success(response.data.message || 'OTP sent to your email!');
+            setOtpSent(true);
+            setCountdown(60);
+        } catch (err) {
+            setLocalError(err.response?.data?.message || 'Failed to send OTP');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleVerifyOTP = async (e) => {
+        e.preventDefault();
+        setLocalError('');
+
+        if (!email || !otp) {
+            return setLocalError('Please enter email and OTP');
+        }
+
+        if (otp.length !== 6) {
+            return setLocalError('Please enter complete 6-digit OTP');
+        }
+
+        try {
+            setLoading(true);
+            const response = await authAPI.verifyLoginOTP(email, otp, 'coordinator');
+            
+            localStorage.setItem('en_token', response.data.token);
+            localStorage.setItem('en_user', JSON.stringify(response.data.user));
+            
+            toast.success('Login successful!');
+            window.location.href = from;
+        } catch (err) {
+            setLocalError(err.response?.data?.message || 'Invalid OTP');
+        } finally {
             setLoading(false);
         }
     };
@@ -127,58 +191,240 @@ const CoordinatorLogin = () => {
                     </div>
                 )}
 
-                {/* Form */}
-                <form onSubmit={handleSubmit}>
-                    <InputField
-                        icon={Building2}
-                        type="text"
-                        placeholder="Registered College Name"
-                        value={collegeName}
-                        onChange={(e) => setCollegeName(e.target.value)}
-                    />
-
-                    <InputField
-                        icon={Mail}
-                        type="email"
-                        placeholder="Coordinator Email Address"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
-
-                    <InputField
-                        icon={Lock}
-                        type="password"
-                        placeholder="Password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        isPassword
-                        showPassword={showPassword}
-                        togglePassword={() => setShowPassword(!showPassword)}
-                    />
-
+                {/* Login Mode Toggle */}
+                <div style={{ display: 'flex', gap: '10px', marginBottom: '24px', background: 'rgba(255,255,255,0.03)', padding: '6px', borderRadius: '12px', border: '1px solid var(--border)' }}>
                     <button
-                        type="submit"
-                        disabled={loading}
-                        className="btn-primary"
+                        type="button"
+                        onClick={() => setLoginMode('password')}
                         style={{
-                            width: '100%', padding: '14px', fontSize: '1rem',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                            marginTop: '10px', opacity: loading ? 0.7 : 1, cursor: loading ? 'not-allowed' : 'pointer',
-                            backgroundImage: 'linear-gradient(135deg, var(--cyan) 0%, #3B82F6 100%)',
-                            color: '#0F172A', fontWeight: 'bold'
+                            flex: 1,
+                            padding: '10px',
+                            background: loginMode === 'password' ? 'var(--cyan)' : 'transparent',
+                            color: loginMode === 'password' ? '#0F172A' : 'white',
+                            border: 'none',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            fontSize: '0.9rem',
+                            fontWeight: 600,
+                            transition: 'all 0.3s',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '6px'
                         }}
                     >
-                        {loading ? (
-                            <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: '2px solid rgba(15,23,42,0.3)', borderTopColor: '#0F172A', animation: 'spin 1s linear infinite' }} />
-                        ) : (
-                            <>Sign In to Dashboard <ArrowRight size={18} /></>
-                        )}
+                        <Lock size={16} /> Password
                     </button>
-                    <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-                </form>
+                    <button
+                        type="button"
+                        onClick={() => setLoginMode('otp')}
+                        style={{
+                            flex: 1,
+                            padding: '10px',
+                            background: loginMode === 'otp' ? 'var(--cyan)' : 'transparent',
+                            color: loginMode === 'otp' ? '#0F172A' : 'white',
+                            border: 'none',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            fontSize: '0.9rem',
+                            fontWeight: 600,
+                            transition: 'all 0.3s',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '6px'
+                        }}
+                    >
+                        <KeyRound size={16} /> OTP
+                    </button>
+                </div>
+
+                {/* Password Login Form */}
+                {loginMode === 'password' && (
+                    <form onSubmit={handlePasswordLogin}>
+                        <InputField
+                            icon={Building2}
+                            type="text"
+                            placeholder="Registered College Name"
+                            value={collegeName}
+                            onChange={(e) => setCollegeName(e.target.value)}
+                        />
+
+                        <InputField
+                            icon={Mail}
+                            type="email"
+                            placeholder="Coordinator Email Address"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
+
+                        <InputField
+                            icon={Lock}
+                            type="password"
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            isPassword
+                            showPassword={showPassword}
+                            togglePassword={() => setShowPassword(!showPassword)}
+                        />
+
+                        <div style={{ textAlign: 'right', marginBottom: '20px' }}>
+                            <Link to="/coordinator/forgot-password" style={{ color: 'var(--cyan)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 500 }}>
+                                Forgot Password?
+                            </Link>
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="btn-primary"
+                            style={{
+                                width: '100%', padding: '14px', fontSize: '1rem',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                                opacity: loading ? 0.7 : 1, cursor: loading ? 'not-allowed' : 'pointer',
+                                backgroundImage: 'linear-gradient(135deg, var(--cyan) 0%, #3B82F6 100%)',
+                                color: '#0F172A', fontWeight: 'bold'
+                            }}
+                        >
+                            {loading ? (
+                                <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: '2px solid rgba(15,23,42,0.3)', borderTopColor: '#0F172A', animation: 'spin 1s linear infinite' }} />
+                            ) : (
+                                <>Sign In to Dashboard <ArrowRight size={18} /></>
+                            )}
+                        </button>
+                    </form>
+                )}
+
+                {/* OTP Login Form */}
+                {loginMode === 'otp' && (
+                    <>
+                        {!otpSent ? (
+                            <form onSubmit={handleRequestOTP}>
+                                <InputField
+                                    icon={Mail}
+                                    type="email"
+                                    placeholder="Coordinator Email Address"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                />
+
+                                <div style={{ background: 'rgba(34, 211, 238, 0.1)', border: '1px solid rgba(34, 211, 238, 0.2)', padding: '12px', borderRadius: '12px', marginBottom: '20px' }}>
+                                    <p style={{ color: 'var(--cyan)', fontSize: '0.85rem', margin: 0, display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                                        <CheckCircle size={16} style={{ marginTop: '2px', flexShrink: 0 }} />
+                                        <span>We'll send a 6-digit OTP to your registered email address for secure login.</span>
+                                    </p>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="btn-primary"
+                                    style={{
+                                        width: '100%', padding: '14px', fontSize: '1rem',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                                        opacity: loading ? 0.7 : 1, cursor: loading ? 'not-allowed' : 'pointer',
+                                        backgroundImage: 'linear-gradient(135deg, var(--cyan) 0%, #3B82F6 100%)',
+                                        color: '#0F172A', fontWeight: 'bold'
+                                    }}
+                                >
+                                    {loading ? (
+                                        <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: '2px solid rgba(15,23,42,0.3)', borderTopColor: '#0F172A', animation: 'spin 1s linear infinite' }} />
+                                    ) : (
+                                        <>Send OTP <ArrowRight size={18} /></>
+                                    )}
+                                </button>
+                            </form>
+                        ) : (
+                            <form onSubmit={handleVerifyOTP}>
+                                <div style={{ marginBottom: '24px' }}>
+                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '20px', textAlign: 'center' }}>
+                                        Enter the 6-digit OTP sent to<br />
+                                        <strong style={{ color: 'var(--cyan)' }}>{email}</strong>
+                                    </p>
+                                    
+                                    <OTPInput
+                                        length={6}
+                                        value={otp}
+                                        onChange={setOtp}
+                                    />
+
+                                    <div style={{ textAlign: 'center', marginTop: '16px' }}>
+                                        {countdown > 0 ? (
+                                            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                                                Resend OTP in <span style={{ color: 'var(--cyan)', fontWeight: 600 }}>{countdown}s</span>
+                                            </p>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                onClick={handleRequestOTP}
+                                                disabled={loading}
+                                                style={{
+                                                    background: 'none',
+                                                    border: 'none',
+                                                    color: 'var(--cyan)',
+                                                    cursor: 'pointer',
+                                                    fontSize: '0.9rem',
+                                                    fontWeight: 600,
+                                                    textDecoration: 'underline'
+                                                }}
+                                            >
+                                                Resend OTP
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={loading || otp.length !== 6}
+                                    className="btn-primary"
+                                    style={{
+                                        width: '100%', padding: '14px', fontSize: '1rem',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                                        opacity: (loading || otp.length !== 6) ? 0.7 : 1,
+                                        cursor: (loading || otp.length !== 6) ? 'not-allowed' : 'pointer',
+                                        backgroundImage: 'linear-gradient(135deg, var(--cyan) 0%, #3B82F6 100%)',
+                                        color: '#0F172A', fontWeight: 'bold',
+                                        marginBottom: '16px'
+                                    }}
+                                >
+                                    {loading ? (
+                                        <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: '2px solid rgba(15,23,42,0.3)', borderTopColor: '#0F172A', animation: 'spin 1s linear infinite' }} />
+                                    ) : (
+                                        <>Verify & Login <ArrowRight size={18} /></>
+                                    )}
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => { setOtpSent(false); setOtp(''); }}
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px',
+                                        background: 'rgba(255,255,255,0.05)',
+                                        border: '1px solid var(--border)',
+                                        borderRadius: '12px',
+                                        color: 'var(--text-muted)',
+                                        cursor: 'pointer',
+                                        fontSize: '0.9rem'
+                                    }}
+                                >
+                                    Change Email
+                                </button>
+                            </form>
+                        )}
+                    </>
+                )}
+
+                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
                 {/* Footer Links */}
                 <div style={{ marginTop: '32px', textAlign: 'center' }}>
+                    <Link to="/coordinator-forgot-password" style={{ color: 'var(--cyan)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 500, display: 'inline-block', marginBottom: '20px' }}>
+                        Forgot Password?
+                    </Link>
+
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginBottom: '20px' }}>
                         Institution not registered?{' '}
                         <Link to="/coordinator-signup" style={{ color: 'var(--cyan)', textDecoration: 'none', fontWeight: 600 }}>Sign up</Link>

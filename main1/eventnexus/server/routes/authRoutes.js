@@ -10,6 +10,10 @@ const {
     updateStudentProfile,
     updateCoordinatorProfile,
     changePassword,
+    requestLoginOTP,
+    verifyLoginOTP,
+    requestForgotPasswordOTP,
+    resetPasswordWithOTP,
 } = require("../controllers/authController");
 const { protect } = require("../middleware/authMiddleware");
 
@@ -63,6 +67,12 @@ router.post("/student/login", studentLoginValidation, loginStudent);
 router.post("/coordinator/register", coordinatorRegisterValidation, registerCoordinator);
 router.post("/coordinator/login", coordinatorLoginValidation, loginCoordinator);
 router.post("/logout", logout);
+
+// OTP Routes
+router.post("/otp/request-login", requestLoginOTP);
+router.post("/otp/verify-login", verifyLoginOTP);
+router.post("/otp/request-forgot-password", requestForgotPasswordOTP);
+router.post("/otp/reset-password", resetPasswordWithOTP);
 
 router.get("/me", protect, getMe);
 router.put("/student/profile", protect, authorizeRoles("student"), updateStudentProfile);

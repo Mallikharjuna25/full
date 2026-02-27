@@ -20,7 +20,7 @@ const StudentHome = () => {
         const fetchEvents = async () => {
             setLoading(true);
             try {
-                const { data } = await eventsAPI.getAll({ status: 'approved', category, search: searchTerm });
+                const { data } = await eventsAPI.getAllEvents({ status: 'approved', category, search: searchTerm });
                 setEvents(data.events || []);
             } catch (err) {
                 console.error(err);
