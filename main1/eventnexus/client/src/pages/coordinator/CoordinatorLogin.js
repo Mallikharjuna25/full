@@ -72,6 +72,16 @@ const CoordinatorLogin = () => {
         }
     }, [countdown]);
 
+    // Reset OTP state when email changes (for switching accounts)
+    React.useEffect(() => {
+        if (loginMode === 'otp') {
+            setOtpSent(false);
+            setOtp('');
+            setCountdown(0);
+            setLocalError('');
+        }
+    }, [email, loginMode]);
+
     const handlePasswordLogin = async (e) => {
         e.preventDefault();
         setLocalError('');

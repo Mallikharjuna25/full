@@ -6,6 +6,7 @@ import { registrationsAPI } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { getCategoryColor } from '../utils/helpers';
 import LoadingSpinner from '../components/LoadingSpinner';
+import Navbar from '../components/Navbar';
 
 const localizer = momentLocalizer(moment);
 
@@ -51,12 +52,14 @@ const CalendarPage = () => {
     if (loading) return <LoadingSpinner />;
 
     return (
-        <div style={{ padding: '100px 5% 60px', maxWidth: '1200px', margin: '0 auto', minHeight: '100vh' }}>
+        <>
+            <Navbar />
+            <div style={{ padding: '100px 5% 60px', maxWidth: '1200px', margin: '0 auto', minHeight: '100vh' }}>
 
-            <header className="reveal visible" style={{ marginBottom: '30px' }}>
-                <h1 style={{ fontSize: '2.5rem', marginBottom: '10px' }}>Your Calendar</h1>
-                <p style={{ color: 'var(--text-muted)' }}>Keep track of all your registered events.</p>
-            </header>
+                <header className="reveal visible" style={{ marginBottom: '30px' }}>
+                    <h1 style={{ fontSize: '2.5rem', marginBottom: '10px' }}>Your Calendar</h1>
+                    <p style={{ color: 'var(--text-muted)' }}>Keep track of all your registered events.</p>
+                </header>
 
             <div className="glass reveal visible" style={{ padding: '30px', borderRadius: '24px', background: 'var(--navy2)' }}>
                 <div style={{ height: '70vh' }}>
@@ -86,6 +89,7 @@ const CalendarPage = () => {
             </div>
 
         </div>
+        </>
     );
 };
 

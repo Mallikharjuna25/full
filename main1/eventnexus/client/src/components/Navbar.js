@@ -61,44 +61,47 @@ const Navbar = () => {
 
     return (
         <header style={headerStyle}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: '1200px', margin: '0 auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: '1400px', margin: '0 auto' }}>
 
                 {/* Logo */}
-                <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
+                <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none', flexShrink: 0 }}>
                     <div style={{ background: 'var(--violet)', width: '36px', height: '36px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>
                         ✨
                     </div>
-                    <h2 style={{ margin: 0, fontSize: '1.2rem', color: 'white' }}>
+                    <h2 style={{ margin: 0, fontSize: '1.2rem', color: 'white', whiteSpace: 'nowrap' }}>
                         Event<span className="grad-text">Nexus</span>
                     </h2>
                 </Link>
 
-                {/* Desktop Nav */}
-                <nav style={{ display: 'flex', gap: '30px', alignItems: 'center' }} className="desktop-nav">
-                    {navLinks.map((link) => (
-                        <NavLink
-                            key={link.name}
-                            to={link.path}
-                            onClick={(e) => handleNavClick(e, link.path)}
-                            className={({ isActive }) => `nav-link ${isActive && link.path !== '/' && !link.path.includes('#') ? 'active' : ''}`}
-                            style={{ color: 'white', textDecoration: 'none', fontWeight: 500 }}
-                        >
-                            {link.name}
-                        </NavLink>
-                    ))}
-                </nav>
+                {/* Right side: Nav + Auth Button */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }} className="desktop-nav">
+                    {/* Desktop Nav */}
+                    <nav style={{ display: 'flex', gap: '32px', alignItems: 'center' }}>
+                        {navLinks.map((link) => (
+                            <NavLink
+                                key={link.name}
+                                to={link.path}
+                                onClick={(e) => handleNavClick(e, link.path)}
+                                className={({ isActive }) => `nav-link ${isActive && link.path !== '/' && !link.path.includes('#') ? 'active' : ''}`}
+                                style={{ color: 'white', textDecoration: 'none', fontWeight: 500, whiteSpace: 'nowrap' }}
+                            >
+                                {link.name}
+                            </NavLink>
+                        ))}
+                    </nav>
 
-                {/* Desktop Auth / Profile CTA */}
-                <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }} className="desktop-nav">
-                    {!isAuthenticated ? (
-                        <Link to="/role-selection" className="btn-primary" style={{ textDecoration: 'none' }}>Login</Link>
-                    ) : (
-                        isStudent ? (
-                            <Link to="/student/home" className="btn-primary" style={{ textDecoration: 'none' }}>Go to Dashboard</Link>
-                        ) : isCoordinator ? (
-                            <Link to="/coordinator/dashboard" className="btn-primary" style={{ textDecoration: 'none', backgroundImage: 'var(--grad2)' }}>Go to Dashboard</Link>
-                        ) : null
-                    )}
+                    {/* Desktop Auth / Profile CTA */}
+                    <div style={{ flexShrink: 0 }}>
+                        {!isAuthenticated ? (
+                            <Link to="/role-selection" className="btn-primary" style={{ textDecoration: 'none' }}>Login</Link>
+                        ) : (
+                            isStudent ? (
+                                <Link to="/student/home" className="btn-primary" style={{ textDecoration: 'none' }}>Go to Dashboard</Link>
+                            ) : isCoordinator ? (
+                                <Link to="/coordinator/dashboard" className="btn-primary" style={{ textDecoration: 'none', backgroundImage: 'var(--grad2)' }}>Go to Dashboard</Link>
+                            ) : null
+                        )}
+                    </div>
                 </div>
 
                 {/* Mobile Toggle */}

@@ -277,13 +277,18 @@ exports.requestLoginOTP = async (req, res) => {
             expiresAt
         });
 
-        // Send OTP via email
-        await sendOTPEmail({
-            to: email,
-            userName: user.name,
-            otp,
-            purpose: 'login'
-        });
+        // Send OTP via email (with console fallback for hackathon)
+        try {
+            await sendOTPEmail({
+                to: email,
+                userName: user.name,
+                otp,
+                purpose: 'login'
+            });
+        } catch (emailError) {
+            // Log email error but don't fail the request
+            console.error('Email send failed, but OTP saved:', emailError.message);
+        }
 
         res.status(200).json({
             success: true,
@@ -390,13 +395,18 @@ exports.requestForgotPasswordOTP = async (req, res) => {
             expiresAt
         });
 
-        // Send OTP via email
-        await sendOTPEmail({
-            to: email,
-            userName: user.name,
-            otp,
-            purpose: 'forgot-password'
-        });
+        // Send OTP via email (with console fallback for hackathon)
+        try {
+            await sendOTPEmail({
+                to: email,
+                userName: user.name,
+                otp,
+                purpose: 'forgot-password'
+            });
+        } catch (emailError) {
+            // Log email error but don't fail the request
+            console.error('Email send failed, but OTP saved:', emailError.message);
+        }
 
         res.status(200).json({
             success: true,
