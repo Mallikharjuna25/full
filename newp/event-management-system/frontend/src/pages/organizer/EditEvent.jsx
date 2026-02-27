@@ -171,7 +171,7 @@ const EditEvent = () => {
 
                 <div className="card border-pink-500/20">
                     <h2 className="text-xl font-bold text-white mb-2 border-b border-surface-border pb-4">Registration Form Fields</h2>
-                    <EventFormBuilder fields={customFields} setFields={setCustomFields} />
+                    <EventFormBuilder customFields={customFields} setCustomFields={setCustomFields} />
                 </div>
 
                 <div className="flex justify-end pt-6">

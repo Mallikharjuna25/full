@@ -13,7 +13,7 @@ const StudentCalendar = () => {
     useEffect(() => {
         const fetchMyEvents = async () => {
             try {
-                const { data } = await axios.get('/student/registered-events');
+                const { data } = await axios.get('/student/my-events');
                 const formatted = data.map(reg => {
                     if (!reg.event) return null;
                     const ev = reg.event;

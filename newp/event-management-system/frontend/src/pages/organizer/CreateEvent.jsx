@@ -64,6 +64,7 @@ const CreateEvent = () => {
             // 2. Create Event
             const payload = {
                 ...formData,
+                maxParticipants: formData.capacity,
                 bannerImage: imagePath,
                 customFields,
             };
@@ -214,7 +215,7 @@ const CreateEvent = () => {
                     <p className="text-sm text-gray-400 mb-6">
                         Basic details (Name, Email, College, Reg No) are automatically collected. Add any event-specific fields below.
                     </p>
-                    <EventFormBuilder fields={customFields} setFields={setCustomFields} />
+                    <EventFormBuilder customFields={customFields} setCustomFields={setCustomFields} />
                 </div>
 
                 {/* Submit */}

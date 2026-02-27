@@ -11,7 +11,7 @@ const StudentMyEvents = () => {
     useEffect(() => {
         const fetchMyEvents = async () => {
             try {
-                const { data } = await axios.get('/student/registered-events');
+                const { data } = await axios.get('/student/my-events');
                 setRegistrations(data);
             } catch (error) {
                 console.error('Failed to fetch registered events', error);

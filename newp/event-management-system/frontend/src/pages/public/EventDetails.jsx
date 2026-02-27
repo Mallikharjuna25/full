@@ -30,7 +30,7 @@ const EventDetails = () => {
 
                 // Check if already registered
                 if (isAuthenticated && role === 'student') {
-                    const regRes = await axios.get('/student/registered-events');
+                    const regRes = await axios.get('/student/my-events');
                     const isReg = regRes.data.some(reg => reg.event._id === id);
                     setHasRegistered(isReg);
                 }
@@ -59,8 +59,8 @@ const EventDetails = () => {
         // Validate custom fields
         if (event.customFields && event.customFields.length > 0) {
             for (let field of event.customFields) {
-                if (field.required && !customFieldData[field.label]) {
-                    toast.error(`Please fill out: ${field.label}`);
+                if (field.required && !customFieldData[field.fieldName]) {
+                    toast.error(`Please fill out: ${field.fieldName}`);
                     return;
                 }
             }
@@ -68,7 +68,7 @@ const EventDetails = () => {
 
         setIsRegistering(true);
         try {
-            const { data } = await axios.post(`/student/register/${id}`, { customFieldData });
+            const { data } = await axios.post(`/student/events/${id}/register`, { customFieldData });
             toast.success('Successfully registered! QR pass sent to your email.');
             setHasRegistered(true);
             setQrCodeData(data.qrCode); // Show modal with QR
@@ -201,23 +201,23 @@ const EventDetails = () => {
                                 <form onSubmit={handleRegister} className="space-y-5">
                                     {/* Custom Fields */}
                                     {event.customFields && event.customFields.map((field) => (
-                                        <div key={field.label}>
+                                        <div key={field.fieldName}>
                                             <label className="block text-sm font-medium text-gray-400 mb-1">
-                                                {field.label} {field.required && <span className="text-red-500">*</span>}
+                                                {field.fieldName} {field.required && <span className="text-red-500">*</span>}
                                             </label>
-                                            {field.type === 'text' || field.type === 'number' ? (
+                                            {field.fieldType === 'text' || field.fieldType === 'number' ? (
                                                 <input
-                                                    type={field.type}
+                                                    type={field.fieldType}
                                                     required={field.required}
-                                                    value={customFieldData[field.label] || ''}
-                                                    onChange={(e) => setCustomFieldData({ ...customFieldData, [field.label]: e.target.value })}
+                                                    value={customFieldData[field.fieldName] || ''}
+                                                    onChange={(e) => setCustomFieldData({ ...customFieldData, [field.fieldName]: e.target.value })}
                                                     className="input-field"
                                                 />
-                                            ) : field.type === 'dropdown' ? (
+                                            ) : field.fieldType === 'dropdown' ? (
                                                 <select
                                                     required={field.required}
-                                                    value={customFieldData[field.label] || ''}
-                                                    onChange={(e) => setCustomFieldData({ ...customFieldData, [field.label]: e.target.value })}
+                                                    value={customFieldData[field.fieldName] || ''}
+                                                    onChange={(e) => setCustomFieldData({ ...customFieldData, [field.fieldName]: e.target.value })}
                                                     className="input-field"
                                                 >
                                                     <option value="">Select an option</option>

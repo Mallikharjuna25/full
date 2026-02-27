@@ -94,8 +94,12 @@ export const registerForEvent = asyncHandler(async (req, res) => {
         await session.commitTransaction();
         session.endSession();
 
-        // Async email sending
-        sendQRCodeEmail(req.user.email, req.user.name, event.title, qrCodeBase64);
+        // Async email sending (fire and forget)
+        try {
+            sendQRCodeEmail(req.user.email, req.user.name, event.title, qrCodeBase64);
+        } catch (emailErr) {
+            console.error('Non-fatal: Failed to send QR email', emailErr);
+        }
 
         res.status(201).json(registration);
     } catch (error) {

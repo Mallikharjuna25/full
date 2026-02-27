@@ -28,9 +28,9 @@ const ScanQRPage = () => {
         fetchEvent();
     }, [id, navigate]);
 
-    const handleScan = async (registrationId) => {
+    const handleScan = async (scannedString) => {
         try {
-            const { data } = await axios.post(`/organizer/event/${id}/scan`, { registrationId });
+            const { data } = await axios.post(`/organizer/events/${id}/scan`, { qrData: scannedString });
             toast.success(data.message || 'Attendance marked successfully!');
             setLastScanned({
                 success: true,
@@ -70,8 +70,8 @@ const ScanQRPage = () => {
 
             {lastScanned && (
                 <div className={`p-6 rounded-2xl border text-center transition-all ${lastScanned.success
-                        ? 'bg-green-500/10 border-green-500/30'
-                        : 'bg-red-500/10 border-red-500/30'
+                    ? 'bg-green-500/10 border-green-500/30'
+                    : 'bg-red-500/10 border-red-500/30'
                     }`}>
                     <div className="flex justify-center mb-3">
                         {lastScanned.success ? (

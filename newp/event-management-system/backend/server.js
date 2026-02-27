@@ -9,6 +9,7 @@ import studentRoutes from './routes/studentRoutes.js';
 import organizerRoutes from './routes/organizerRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import eventRoutes from './routes/eventRoutes.js';
+import uploadRoutes from './routes/uploadRoutes.js';
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ app.use('/api/student', studentRoutes);
 app.use('/api/organizer', organizerRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/events', eventRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {

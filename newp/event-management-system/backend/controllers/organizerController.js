@@ -20,13 +20,11 @@ export const getProfile = asyncHandler(async (req, res) => {
 // @route   POST /api/organizer/events
 // @access  Private / Organizer / Approved
 export const createEvent = asyncHandler(async (req, res) => {
-    let { title, description, date, time, venue, category, maxParticipants, customFields } = req.body;
+    let { title, description, date, time, venue, category, maxParticipants, customFields, bannerImage } = req.body;
 
     if (typeof customFields === 'string') {
         customFields = JSON.parse(customFields);
     }
-
-    const bannerImage = req.file ? `/uploads/${req.file.filename}` : '';
 
     const event = new Event({
         title,
